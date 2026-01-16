@@ -17,12 +17,14 @@ export default function Home() {
   }, [router]);
 
   const createRoom = () => {
-    if (!userName.trim()) {
-      alert('Please enter your name first');
+    const trimmedName = userName.trim();
+    if (!trimmedName) {
+      alert('Please enter your name first. Your name is required to join a room.');
+      document.getElementById('userName')?.focus();
       return;
     }
     const newRoomId = Math.random().toString(36).substring(2, 9);
-    const roomUrl = `/room/${newRoomId}?name=${encodeURIComponent(userName)}`;
+    const roomUrl = `/room/${newRoomId}?name=${encodeURIComponent(trimmedName)}`;
     console.log('🚪 Navigating to room:', roomUrl);
     
     // Use window.location for more reliable navigation
@@ -30,15 +32,20 @@ export default function Home() {
   };
 
   const joinRoom = () => {
-    if (!roomId.trim()) {
+    const trimmedName = userName.trim();
+    const trimmedRoomId = roomId.trim();
+    
+    if (!trimmedName) {
+      alert('Please enter your name first. Your name is required to join a room.');
+      document.getElementById('userName')?.focus();
+      return;
+    }
+    if (!trimmedRoomId) {
       alert('Please enter a room ID');
+      document.getElementById('roomId')?.focus();
       return;
     }
-    if (!userName.trim()) {
-      alert('Please enter your name first');
-      return;
-    }
-    const roomUrl = `/room/${roomId}?name=${encodeURIComponent(userName)}`;
+    const roomUrl = `/room/${trimmedRoomId}?name=${encodeURIComponent(trimmedName)}`;
     console.log('🚪 Joining room:', roomUrl);
     
     // Use window.location for more reliable navigation
@@ -59,7 +66,7 @@ export default function Home() {
         <div className="space-y-4 mb-6">
           <div>
             <label htmlFor="userName" className="block text-sm font-medium text-gray-300 mb-2">
-              Your Name
+              Your Name <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
@@ -68,8 +75,10 @@ export default function Home() {
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="Enter your name"
+              required
               className="w-full px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             />
+            <p className="mt-1 text-xs text-gray-400">Required to join a room</p>
           </div>
         </div>
 
@@ -81,7 +90,12 @@ export default function Home() {
               e.stopPropagation();
               createRoom();
             }}
-            className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
+            disabled={!userName.trim()}
+            className={`w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 ${
+              !userName.trim()
+                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                : 'bg-primary-500 hover:bg-primary-600 text-white'
+            }`}
           >
             <Video className="w-5 h-5" />
             Create Room
@@ -114,7 +128,12 @@ export default function Home() {
                 e.stopPropagation();
                 joinRoom();
               }}
-              className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 border border-white/20"
+              disabled={!userName.trim() || !roomId.trim()}
+              className={`w-full font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 border ${
+                !userName.trim() || !roomId.trim()
+                  ? 'bg-gray-600/50 text-gray-400 cursor-not-allowed border-gray-600'
+                  : 'bg-white/10 hover:bg-white/20 text-white border-white/20'
+              }`}
             >
               <Users className="w-5 h-5" />
               Join Room

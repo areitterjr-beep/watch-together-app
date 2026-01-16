@@ -21,15 +21,37 @@ export default function RoomPage() {
   const params = useParams();
   const searchParams = useSearchParams();
   const roomId = params.id as string;
-  const userName = searchParams.get('name') || 'Anonymous';
+  const userNameFromUrl = searchParams.get('name');
+  const userName = userNameFromUrl?.trim() || '';
 
-  // Debug: Log when room page loads
+  // Redirect if no name provided
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    if (!userName || !userName.trim()) {
+      console.warn('⚠️ No name provided in URL, redirecting to home');
+      alert('Please enter your name before joining a room. Redirecting to home page...');
+      window.location.href = '/';
+      return;
+    }
+    
     console.log('🏠 Room page component loaded (useEffect)');
     console.log('🏠 Room ID:', roomId);
     console.log('👤 User name:', userName);
-    console.log('🌐 Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A');
+    console.log('🌐 Current URL:', window.location.href);
   }, [roomId, userName]);
+  
+  // Show loading state while redirecting
+  if (!userName || !userName.trim()) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+        <div className="text-white text-center">
+          <h2 className="text-xl mb-2">Redirecting...</h2>
+          <p className="text-gray-400">Please enter your name to join a room.</p>
+        </div>
+      </div>
+    );
+  }
   
   const [showChat, setShowChat] = useState(false);
   const [isHost, setIsHost] = useState(false);
@@ -66,12 +88,18 @@ export default function RoomPage() {
 
   useEffect(() => {
     if (!socket || !connected) return;
+    
+    // Don't join room if no name provided
+    if (!userName || !userName.trim()) {
+      console.warn('⚠️ Cannot join room without a name');
+      return;
+    }
 
     console.log('📤 Joining room:', { roomId, userId: socket.id, userName });
     socket.emit('join-room', {
       roomId,
       userId: socket.id,
-      userName: userName || 'Anonymous'
+      userName: userName.trim()
     });
 
     socket.on('room-state', (state) => {
