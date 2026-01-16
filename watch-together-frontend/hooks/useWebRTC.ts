@@ -32,7 +32,7 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
     });
   }, []);
 
-  // Get user media
+  // Get user media - OFF by default
   useEffect(() => {
     // Only run in browser (not during SSR)
     if (typeof window === 'undefined' || !navigator.mediaDevices) {
@@ -40,7 +40,7 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
       return;
     }
 
-    console.log('📹 Requesting camera and microphone access...');
+    console.log('📹 Requesting camera and microphone access (off by default)...');
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
@@ -48,8 +48,22 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
           videoTracks: stream.getVideoTracks().length,
           audioTracks: stream.getAudioTracks().length
         });
+        
+        // Disable video and audio tracks by default
+        stream.getVideoTracks().forEach((track) => {
+          track.enabled = false;
+        });
+        stream.getAudioTracks().forEach((track) => {
+          track.enabled = false;
+        });
+        
+        // Set initial state to muted and video off
+        setIsMuted(true);
+        setIsVideoOff(true);
+        
         setLocalStream(stream);
         localStreamRef.current = stream;
+        console.log('📹 Camera and microphone are OFF by default');
       })
       .catch((err) => {
         console.error('❌ Error accessing media devices:', err);

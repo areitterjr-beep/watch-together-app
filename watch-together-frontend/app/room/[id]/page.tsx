@@ -25,35 +25,8 @@ export default function RoomPage() {
   const userNameFromUrl = searchParams.get('name');
   const userName = userNameFromUrl?.trim() || '';
 
-  // Redirect if no name provided
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
-    if (!userName || !userName.trim()) {
-      console.warn('⚠️ No name provided in URL, redirecting to home');
-      alert('Please enter your name before joining a room. Redirecting to home page...');
-      window.location.href = '/';
-      return;
-    }
-    
-    console.log('🏠 Room page component loaded (useEffect)');
-    console.log('🏠 Room ID:', roomId);
-    console.log('👤 User name:', userName);
-    console.log('🌐 Current URL:', window.location.href);
-  }, [roomId, userName]);
-  
-  // Show loading state while redirecting
-  if (!userName || !userName.trim()) {
-    return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white text-center">
-          <h2 className="text-xl mb-2">Redirecting...</h2>
-          <p className="text-gray-400">Please enter your name to join a room.</p>
-        </div>
-      </div>
-    );
-  }
-  
+  // ALL HOOKS MUST BE CALLED BEFORE ANY CONDITIONAL RETURNS
+  // This is required by React's Rules of Hooks
   const [showChat, setShowChat] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [participants, setParticipants] = useState<any[]>([]);
@@ -87,6 +60,69 @@ export default function RoomPage() {
     setCustomBackgroundColor,
   } = useBackgroundEffects();
 
+  // State for name prompt modal
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [tempUserName, setTempUserName] = useState('');
+  
+  // Check if name is missing and show prompt (AFTER all hooks)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    // Check if name is missing from URL (user joined from share link)
+    if (!userName || !userName.trim()) {
+      console.warn('⚠️ No name provided in URL - showing name prompt');
+      setShowNamePrompt(true);
+      return;
+    }
+    
+    console.log('🏠 Room page component loaded (useEffect)');
+    console.log('🏠 Room ID:', roomId);
+    console.log('👤 User name:', userName);
+    console.log('🌐 Current URL:', window.location.href);
+  }, [roomId, userName]);
+  
+  // Handle name submission from prompt
+  const handleNameSubmit = () => {
+    const trimmedName = tempUserName.trim();
+    if (!trimmedName) {
+      alert('Please enter your name');
+      return;
+    }
+    
+    // Update URL with name parameter
+    const newUrl = `/room/${roomId}?name=${encodeURIComponent(trimmedName)}`;
+    window.location.href = newUrl;
+  };
+  
+  // Show name prompt modal if no name (AFTER all hooks)
+  if (showNamePrompt) {
+    return (
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="bg-slate-800 rounded-lg shadow-xl max-w-md w-full p-6 border border-slate-700">
+          <h2 className="text-xl font-semibold text-white mb-2">Enter Your Name</h2>
+          <p className="text-gray-400 text-sm mb-4">
+            Please enter your name to join this room.
+          </p>
+          <input
+            type="text"
+            value={tempUserName}
+            onChange={(e) => setTempUserName(e.target.value)}
+            onKeyPress={(e) => e.key === 'Enter' && handleNameSubmit()}
+            placeholder="Your name"
+            className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 mb-4"
+            autoFocus
+          />
+          <button
+            onClick={handleNameSubmit}
+            className="w-full px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors"
+          >
+            Join Room
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   useEffect(() => {
     if (!socket || !connected) return;
     
@@ -106,7 +142,13 @@ export default function RoomPage() {
     socket.on('room-state', (state) => {
       console.log('📥 Room state received:', state);
       console.log('👥 Participants:', state.participants || []);
-      setIsHost(state.hostId === socket.id);
+      const hostStatus = state.hostId === socket.id;
+      console.log('👑 Host status:', { 
+        isHost: hostStatus, 
+        hostId: state.hostId, 
+        mySocketId: socket.id 
+      });
+      setIsHost(hostStatus);
       setParticipants(state.participants || []);
       setVideoUrl(state.videoUrl);
       setVideoType(state.videoType);
@@ -243,21 +285,23 @@ export default function RoomPage() {
           <h1 className="text-xl font-semibold">Room: {roomId}</h1>
           <p className="text-sm text-gray-400">{participants.length} participant{participants.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           <ShareInvite roomId={roomId} userName={userName} />
           {isHost && (
             <>
               <button
                 onClick={() => {
                   if (confirm('Are you sure you want to close this room? All participants will be disconnected.')) {
+                    console.log('🚪 Closing room...');
                     socket?.emit('close-room');
                   }
                 }}
-                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
                 title="Close Room"
               >
                 <X className="w-4 h-4" />
-                Close Room
+                <span className="hidden sm:inline">Close Room</span>
+                <span className="sm:hidden">Close</span>
               </button>
               <span className="px-3 py-1 bg-primary-500 rounded-full text-sm font-medium">
                 Host
