@@ -296,12 +296,6 @@ export default function RoomPage() {
         </div>
         <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           <ShareInvite roomId={roomId} userName={userName} />
-          {/* Debug info - remove in production */}
-          {process.env.NODE_ENV === 'development' && (
-            <div className="text-xs text-gray-500">
-              isHost: {isHost ? 'true' : 'false'} | socket: {socket?.id ? 'connected' : 'disconnected'}
-            </div>
-          )}
           {isHost ? (
             <>
               <button
@@ -322,9 +316,9 @@ export default function RoomPage() {
               </span>
             </>
           ) : (
-            <div className="text-xs text-gray-500 italic">
-              (Only host can close room)
-            </div>
+            <span className="px-3 py-1.5 bg-slate-700 rounded-full text-sm font-medium text-gray-300">
+              {userName || 'Guest'}
+            </span>
           )}
         </div>
       </div>
