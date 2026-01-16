@@ -16,6 +16,14 @@ export default function RoomPage() {
   const searchParams = useSearchParams();
   const roomId = params.id as string;
   const userName = searchParams.get('name') || 'Anonymous';
+
+  // Debug: Log when room page loads
+  useEffect(() => {
+    console.log('🏠 Room page component loaded');
+    console.log('🏠 Room ID:', roomId);
+    console.log('👤 User name:', userName);
+    console.log('🌐 Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A');
+  }, [roomId, userName]);
   
   const [showChat, setShowChat] = useState(false);
   const [isHost, setIsHost] = useState(false);
