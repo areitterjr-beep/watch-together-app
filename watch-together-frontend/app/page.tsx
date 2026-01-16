@@ -10,21 +10,35 @@ export default function Home() {
   const [userName, setUserName] = useState('');
 
   const createRoom = () => {
+    if (!userName.trim()) {
+      alert('Please enter your name first');
+      return;
+    }
     const newRoomId = Math.random().toString(36).substring(2, 9);
-    if (userName.trim()) {
+    try {
       router.push(`/room/${newRoomId}?name=${encodeURIComponent(userName)}`);
-    } else {
-      router.push(`/room/${newRoomId}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to window.location if router fails
+      window.location.href = `/room/${newRoomId}?name=${encodeURIComponent(userName)}`;
     }
   };
 
   const joinRoom = () => {
-    if (roomId.trim()) {
-      if (userName.trim()) {
-        router.push(`/room/${roomId}?name=${encodeURIComponent(userName)}`);
-      } else {
-        router.push(`/room/${roomId}`);
-      }
+    if (!roomId.trim()) {
+      alert('Please enter a room ID');
+      return;
+    }
+    if (!userName.trim()) {
+      alert('Please enter your name first');
+      return;
+    }
+    try {
+      router.push(`/room/${roomId}?name=${encodeURIComponent(userName)}`);
+    } catch (error) {
+      console.error('Navigation error:', error);
+      // Fallback to window.location if router fails
+      window.location.href = `/room/${roomId}?name=${encodeURIComponent(userName)}`;
     }
   };
 
@@ -56,7 +70,12 @@ export default function Home() {
 
         <div className="space-y-4">
           <button
-            onClick={createRoom}
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              createRoom();
+            }}
             className="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2"
           >
             <Video className="w-5 h-5" />
@@ -82,7 +101,12 @@ export default function Home() {
               onKeyPress={(e) => e.key === 'Enter' && joinRoom()}
             />
             <button
-              onClick={joinRoom}
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                joinRoom();
+              }}
               className="w-full bg-white/10 hover:bg-white/20 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 border border-white/20"
             >
               <Users className="w-5 h-5" />
