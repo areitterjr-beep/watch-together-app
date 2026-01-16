@@ -11,8 +11,23 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+  // Debug script that runs immediately
+  if (typeof window !== 'undefined') {
+    console.log('📄 Root layout loaded');
+  }
+  
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              console.log('🚀 Script loaded - JavaScript is working!');
+              console.log('📍 Current URL:', window.location.href);
+            `,
+          }}
+        />
+      </head>
       <body>{children}</body>
     </html>
   )

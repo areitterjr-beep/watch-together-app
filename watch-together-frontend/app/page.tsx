@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Video, Users, ArrowRight } from 'lucide-react';
 
@@ -8,6 +8,13 @@ export default function Home() {
   const router = useRouter();
   const [roomId, setRoomId] = useState('');
   const [userName, setUserName] = useState('');
+
+  // Debug: Log when component loads
+  useEffect(() => {
+    console.log('🏠 Home page component loaded');
+    console.log('🌐 Window available:', typeof window !== 'undefined');
+    console.log('🔗 Router available:', !!router);
+  }, [router]);
 
   const createRoom = () => {
     if (!userName.trim()) {
