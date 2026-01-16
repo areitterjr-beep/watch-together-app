@@ -146,8 +146,17 @@ export default function RoomPage() {
       console.log('👑 Host status:', { 
         isHost: hostStatus, 
         hostId: state.hostId, 
-        mySocketId: socket.id 
+        mySocketId: socket.id,
+        match: state.hostId === socket.id
       });
+      
+      // Set host status with additional logging
+      if (hostStatus) {
+        console.log('✅ YOU ARE THE HOST - Close Room button should be visible');
+      } else {
+        console.log('❌ You are NOT the host. Host ID:', state.hostId, 'Your ID:', socket.id);
+      }
+      
       setIsHost(hostStatus);
       setParticipants(state.participants || []);
       setVideoUrl(state.videoUrl);
@@ -287,7 +296,13 @@ export default function RoomPage() {
         </div>
         <div className="flex items-center gap-2 md:gap-4 flex-wrap">
           <ShareInvite roomId={roomId} userName={userName} />
-          {isHost && (
+          {/* Debug info - remove in production */}
+          {process.env.NODE_ENV === 'development' && (
+            <div className="text-xs text-gray-500">
+              isHost: {isHost ? 'true' : 'false'} | socket: {socket?.id ? 'connected' : 'disconnected'}
+            </div>
+          )}
+          {isHost ? (
             <>
               <button
                 onClick={() => {
@@ -296,17 +311,20 @@ export default function RoomPage() {
                     socket?.emit('close-room');
                   }
                 }}
-                className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2 whitespace-nowrap"
+                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-semibold transition-colors flex items-center gap-2 whitespace-nowrap shadow-lg"
                 title="Close Room"
               >
-                <X className="w-4 h-4" />
-                <span className="hidden sm:inline">Close Room</span>
-                <span className="sm:hidden">Close</span>
+                <X className="w-5 h-5" />
+                <span>Close Room</span>
               </button>
-              <span className="px-3 py-1 bg-primary-500 rounded-full text-sm font-medium">
+              <span className="px-3 py-1.5 bg-primary-500 rounded-full text-sm font-medium">
                 Host
               </span>
             </>
+          ) : (
+            <div className="text-xs text-gray-500 italic">
+              (Only host can close room)
+            </div>
           )}
         </div>
       </div>
