@@ -289,12 +289,12 @@ export default function RoomPage() {
   return (
     <div className="min-h-screen bg-slate-900 text-white flex flex-col">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Room: {roomId}</h1>
-          <p className="text-sm text-gray-400">{participants.length} participant{participants.length !== 1 ? 's' : ''}</p>
+      <div className="bg-slate-800 border-b border-slate-700 px-3 md:px-6 py-3 md:py-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 md:gap-0">
+        <div className="min-w-0">
+          <h1 className="text-lg md:text-xl font-semibold truncate">Room: {roomId}</h1>
+          <p className="text-xs md:text-sm text-gray-400">{participants.length} participant{participants.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="flex items-center gap-2 md:gap-4 flex-wrap">
+        <div className="flex items-center gap-2 md:gap-4 flex-wrap w-full md:w-auto">
           <ShareInvite roomId={roomId} userName={userName} />
           {isHost ? (
             <>
@@ -324,11 +324,11 @@ export default function RoomPage() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
         {/* Left Side - Video Player and Participants */}
-        <div className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col min-w-0">
           {/* Video Player */}
-          <div className="flex-1 bg-black flex items-center justify-center p-4">
+          <div className="flex-1 bg-black flex items-center justify-center p-2 md:p-4 min-h-[200px] md:min-h-0">
             {videoUrl ? (
               <VideoPlayer
                 url={videoUrl}
@@ -372,7 +372,7 @@ export default function RoomPage() {
         </div>
 
         {/* Right Side - Video Grid and Chat */}
-        <div className={`w-80 bg-slate-800 border-l border-slate-700 flex flex-col transition-all ${showChat ? 'w-96' : ''}`}>
+        <div className={`w-full md:w-80 bg-slate-800 border-t md:border-l border-slate-700 flex flex-col transition-all ${showChat ? 'md:w-96' : ''}`}>
           {/* Video Grid */}
           <div className="flex-1 p-4 overflow-y-auto">
             <VideoGrid

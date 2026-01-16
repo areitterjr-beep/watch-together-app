@@ -215,7 +215,7 @@ export default function VideoPlayer({
 
   if (type === 'youtube') {
     return (
-      <div className="w-full h-full flex items-center justify-center bg-black p-4">
+      <div className="w-full h-full flex items-center justify-center bg-black p-2 md:p-4">
         {/* Large container encourages YouTube to serve higher quality video */}
         {/* YouTube's adaptive streaming uses container size to determine quality */}
         <div 
@@ -224,8 +224,8 @@ export default function VideoPlayer({
           style={{ 
             // Use full available space, but ensure minimum size for HD
             // YouTube will adapt quality based on this container size and user's bandwidth
-            minHeight: '480px', // Minimum for decent quality
-            minWidth: '854px', // Minimum for decent quality (16:9 ratio)
+            minHeight: '200px', // Smaller minimum for mobile
+            minWidth: '100%', // Full width on mobile
             maxWidth: '100%',
             maxHeight: '100%',
             aspectRatio: '16/9', // Maintain 16:9 aspect ratio for optimal quality
