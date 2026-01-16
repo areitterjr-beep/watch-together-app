@@ -18,7 +18,9 @@ const io = new Server(server, {
   allowEIO3: true
 });
 
+// Railway provides PORT via environment variable, or use 3003 as fallback
 const PORT = process.env.PORT || 3003;
+console.log('📊 Environment PORT:', process.env.PORT || 'not set, using 3003');
 
 // Middleware
 app.use(cors({
@@ -268,8 +270,27 @@ app.get('/api/rooms/:roomId', (req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+// Bind to 0.0.0.0 to allow Railway to access the server
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Watch Together Server running on port ${PORT}`);
   console.log(`📱 Frontend: ${process.env.FRONTEND_URL || 'http://localhost:3002'}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/health`);
+  console.log(`🔗 Health check: http://0.0.0.0:${PORT}/health`);
+  console.log(`✅ Server is ready and listening on all interfaces`);
+});
+
+// Handle graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('⚠️ SIGTERM received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
+});
+
+process.on('SIGINT', () => {
+  console.log('⚠️ SIGINT received, shutting down gracefully...');
+  server.close(() => {
+    console.log('✅ Server closed');
+    process.exit(0);
+  });
 });
