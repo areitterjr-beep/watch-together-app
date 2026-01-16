@@ -19,12 +19,14 @@ export function useSocket() {
     console.log('📍 Environment variable NEXT_PUBLIC_SOCKET_URL:', process.env.NEXT_PUBLIC_SOCKET_URL || 'NOT SET');
 
     const newSocket = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'], // Try both transports
+      transports: ['polling', 'websocket'], // Try polling first, then websocket
       reconnection: true,
       reconnectionDelay: 1000,
       reconnectionAttempts: 10,
       timeout: 20000,
-      forceNew: true
+      forceNew: true,
+      withCredentials: true,
+      upgrade: true
     });
 
     newSocket.on('connect', () => {
@@ -75,6 +77,4 @@ export function useSocket() {
   }, []);
 
   return { socket, connected, connectionError };
-
-  return { socket, connected };
 }

@@ -11,8 +11,11 @@ const io = new Server(server, {
   cors: {
     origin: process.env.FRONTEND_URL || 'http://localhost:3002',
     methods: ['GET', 'POST'],
-    credentials: true
-  }
+    credentials: true,
+    allowedHeaders: ['*']
+  },
+  transports: ['polling', 'websocket'],
+  allowEIO3: true
 });
 
 const PORT = process.env.PORT || 3003;
