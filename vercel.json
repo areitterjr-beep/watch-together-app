@@ -1,7 +1,7 @@
 {
   "framework": "nextjs",
-  "buildCommand": "cd watch-together-frontend && npm install && npm run build",
-  "devCommand": "cd watch-together-frontend && npm run dev",
-  "installCommand": "cd watch-together-frontend && npm install",
-  "outputDirectory": "watch-together-frontend/.next"
+  "buildCommand": "npm install && npm run build",
+  "devCommand": "npm run dev",
+  "installCommand": "npm install",
+  "outputDirectory": ".next"
 }
