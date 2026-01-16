@@ -12,6 +12,7 @@ export default function ShareInvite({ roomId, userName }: ShareInviteProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [roomUrl, setRoomUrl] = useState('');
+  const [canShare, setCanShare] = useState(false);
 
   useEffect(() => {
     // Generate the full room URL
@@ -20,6 +21,11 @@ export default function ShareInvite({ roomId, userName }: ShareInviteProps) {
       ? `${baseUrl}/room/${roomId}?name=${encodeURIComponent(userName)}`
       : `${baseUrl}/room/${roomId}`;
     setRoomUrl(url);
+
+    // Check if Web Share API is available
+    if (typeof window !== 'undefined' && typeof navigator !== 'undefined' && 'share' in navigator) {
+      setCanShare(true);
+    }
   }, [roomId, userName]);
 
   const copyToClipboard = async () => {
@@ -134,7 +140,7 @@ export default function ShareInvite({ roomId, userName }: ShareInviteProps) {
 
         {/* Action Buttons */}
         <div className="flex flex-col gap-2">
-          {navigator.share && (
+          {canShare && (
             <button
               onClick={shareNative}
               className="w-full px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
