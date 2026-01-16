@@ -55,6 +55,11 @@ export default function VideoPlayer({
             controls: isHost ? 1 : 0,
             modestbranding: 1,
             rel: 0,
+            // Quality: YouTube uses adaptive streaming based on container size and bandwidth
+            // Larger container = higher quality. We ensure container is large enough for HD.
+            playsinline: 1, // Enable inline playback on mobile
+            enablejsapi: 1, // Enable JavaScript API for better control
+            origin: typeof window !== 'undefined' ? window.location.origin : '',
           },
           events: {
             onStateChange: (event: any) => {
@@ -67,6 +72,11 @@ export default function VideoPlayer({
               }
             },
             onReady: () => {
+              // Note: YouTube IFrame API no longer supports setPlaybackQuality()
+              // Quality is now adaptive based on container size, bandwidth, and device
+              // We ensure the container is large enough (min 854x480) to encourage HD playback
+              console.log('✅ YouTube player ready - quality will adapt based on container size and bandwidth');
+
               if (isHost) {
                 // Start time sync
                 syncIntervalRef.current = setInterval(() => {
@@ -98,9 +108,19 @@ export default function VideoPlayer({
             controls: isHost ? 1 : 0,
             modestbranding: 1,
             rel: 0,
+            // Quality: YouTube uses adaptive streaming based on container size and bandwidth
+            // Larger container = higher quality. We ensure container is large enough for HD.
+            playsinline: 1, // Enable inline playback on mobile
+            enablejsapi: 1, // Enable JavaScript API for better control
+            origin: typeof window !== 'undefined' ? window.location.origin : '',
           },
           events: {
             onReady: () => {
+              // Note: YouTube IFrame API no longer supports setPlaybackQuality()
+              // Quality is now adaptive based on container size, bandwidth, and device
+              // We ensure the container is large enough (min 854x480) to encourage HD playback
+              console.log('✅ YouTube player ready - quality will adapt based on container size and bandwidth');
+
               if (isHost) {
                 syncIntervalRef.current = setInterval(() => {
                   if (youtubePlayerRef.current) {
@@ -195,8 +215,25 @@ export default function VideoPlayer({
 
   if (type === 'youtube') {
     return (
-      <div className="w-full h-full flex items-center justify-center">
-        <div ref={playerRef} className="w-full h-full max-w-7xl"></div>
+      <div className="w-full h-full flex items-center justify-center bg-black p-4">
+        {/* Large container encourages YouTube to serve higher quality video */}
+        {/* YouTube's adaptive streaming uses container size to determine quality */}
+        <div 
+          ref={playerRef} 
+          className="w-full h-full"
+          style={{ 
+            // Use full available space, but ensure minimum size for HD
+            // YouTube will adapt quality based on this container size and user's bandwidth
+            minHeight: '480px', // Minimum for decent quality
+            minWidth: '854px', // Minimum for decent quality (16:9 ratio)
+            maxWidth: '100%',
+            maxHeight: '100%',
+            aspectRatio: '16/9', // Maintain 16:9 aspect ratio for optimal quality
+            // Ensure container is as large as possible within viewport
+            width: '100%',
+            height: '100%'
+          }}
+        ></div>
       </div>
     );
   }
