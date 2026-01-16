@@ -96,8 +96,8 @@ export default function VideoGrid({
   };
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">
+    <div className="space-y-2 md:space-y-4">
+      <h3 className="text-xs md:text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2 md:mb-4">
         Participants ({participants.length})
       </h3>
 
