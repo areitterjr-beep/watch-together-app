@@ -28,7 +28,7 @@ export default function RoomPage() {
     duration: 0
   });
 
-  const { socket, connected } = useSocket();
+  const { socket, connected, connectionError } = useSocket();
   // Only initialize WebRTC in browser (not during SSR)
   const webRTCEnabled = typeof window !== 'undefined';
   const { localStream, remoteStreams, peers, toggleMute, toggleVideo, isMuted, isVideoOff } = useWebRTC(
@@ -130,25 +130,48 @@ export default function RoomPage() {
   if (!connected) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-        <div className="max-w-md w-full text-center">
+        <div className="max-w-md w-full text-center bg-slate-800 rounded-lg p-6 border border-slate-700">
           <div className="text-white text-xl mb-4">Connecting to server...</div>
+          
+          {connectionError && (
+            <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-lg">
+              <div className="text-red-400 text-sm font-semibold mb-1">Connection Error:</div>
+              <div className="text-red-300 text-xs">{connectionError}</div>
+            </div>
+          )}
+          
           <div className="text-gray-400 text-sm mb-4">
-            If this takes more than a few seconds, check:
+            Troubleshooting steps:
           </div>
           <ul className="text-left text-gray-400 text-sm space-y-2 mb-4">
-            <li>• Backend is running</li>
-            <li>• CORS settings are configured</li>
-            <li>• Environment variable is set</li>
+            <li>1. Check Railway → Backend → Variables → <code className="text-primary-400">FRONTEND_URL</code></li>
+            <li>2. Should be: <code className="text-primary-400">https://watch-together-app-theta.vercel.app</code></li>
+            <li>3. Check Vercel → Settings → Environment Variables → <code className="text-primary-400">NEXT_PUBLIC_SOCKET_URL</code></li>
+            <li>4. Should be: <code className="text-primary-400">https://watch-together-app-production.up.railway.app</code></li>
           </ul>
-          <div className="text-xs text-gray-500">
-            Backend URL: {process.env.NEXT_PUBLIC_SOCKET_URL || 'Not set'}
+          
+          <div className="text-xs text-gray-500 mb-4 p-2 bg-slate-700 rounded">
+            <div>Backend URL: <code className="text-primary-400">{process.env.NEXT_PUBLIC_SOCKET_URL || 'NOT SET'}</code></div>
+            <div className="mt-1">Frontend URL: <code className="text-primary-400">{typeof window !== 'undefined' ? window.location.origin : 'N/A'}</code></div>
           </div>
-          <button
-            onClick={() => window.location.reload()}
-            className="mt-4 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg"
-          >
-            Retry Connection
-          </button>
+          
+          <div className="flex gap-2 justify-center">
+            <button
+              onClick={() => window.location.reload()}
+              className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm"
+            >
+              Retry Connection
+            </button>
+            <button
+              onClick={() => {
+                const backendUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'https://watch-together-app-production.up.railway.app';
+                window.open(backendUrl + '/health', '_blank');
+              }}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-sm"
+            >
+              Test Backend
+            </button>
+          </div>
         </div>
       </div>
     );
