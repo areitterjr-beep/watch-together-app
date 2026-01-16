@@ -55,11 +55,13 @@ export default function Home() {
 
         <div className="space-y-4 mb-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+            <label htmlFor="userName" className="block text-sm font-medium text-gray-300 mb-2">
               Your Name
             </label>
             <input
               type="text"
+              id="userName"
+              name="userName"
               value={userName}
               onChange={(e) => setUserName(e.target.value)}
               placeholder="Enter your name"
@@ -94,6 +96,8 @@ export default function Home() {
           <div className="space-y-3">
             <input
               type="text"
+              id="roomId"
+              name="roomId"
               value={roomId}
               onChange={(e) => setRoomId(e.target.value)}
               placeholder="Enter room ID"

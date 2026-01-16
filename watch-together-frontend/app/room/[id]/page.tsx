@@ -129,8 +129,27 @@ export default function RoomPage() {
 
   if (!connected) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
-        <div className="text-white text-xl">Connecting to server...</div>
+      <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center">
+          <div className="text-white text-xl mb-4">Connecting to server...</div>
+          <div className="text-gray-400 text-sm mb-4">
+            If this takes more than a few seconds, check:
+          </div>
+          <ul className="text-left text-gray-400 text-sm space-y-2 mb-4">
+            <li>• Backend is running</li>
+            <li>• CORS settings are configured</li>
+            <li>• Environment variable is set</li>
+          </ul>
+          <div className="text-xs text-gray-500">
+            Backend URL: {process.env.NEXT_PUBLIC_SOCKET_URL || 'Not set'}
+          </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="mt-4 px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg"
+          >
+            Retry Connection
+          </button>
+        </div>
       </div>
     );
   }
