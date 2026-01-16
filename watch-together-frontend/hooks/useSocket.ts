@@ -47,7 +47,9 @@ export function useSocket() {
     newSocket.on('connect_error', (error) => {
       console.error('❌ Connection error:', error);
       console.error('Error message:', error.message);
-      console.error('Error type:', error.type);
+      if ('type' in error) {
+        console.error('Error type:', (error as any).type);
+      }
       setConnected(false);
       
       if (error.message.includes('CORS')) {
