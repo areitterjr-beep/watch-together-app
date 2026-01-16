@@ -212,6 +212,38 @@ io.on('connection', (socket) => {
     });
   });
 
+  // Close room (host only)
+  socket.on('close-room', () => {
+    const roomId = userRooms.get(socket.id);
+    if (!roomId) return;
+
+    const room = rooms.get(roomId);
+    if (!room) return;
+
+    // Only host can close the room
+    if (room.hostId !== socket.id) {
+      console.log(`⚠️ User ${socket.id} attempted to close room ${roomId} but is not host`);
+      return;
+    }
+
+    console.log(`🚪 Host closing room ${roomId}`);
+
+    // Notify all participants that the room is closed
+    io.to(roomId).emit('room-closed', {
+      message: 'The host has closed the room.',
+      timestamp: Date.now()
+    });
+
+    // Clean up the room
+    rooms.delete(roomId);
+    console.log(`🗑️ Room ${roomId} deleted (closed by host)`);
+
+    // Clean up user rooms for all participants
+    room.participants.forEach((participant) => {
+      userRooms.delete(participant.socketId);
+    });
+  });
+
   // Disconnect
   socket.on('disconnect', () => {
     console.log(`❌ User disconnected: ${socket.id}`);

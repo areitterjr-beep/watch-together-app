@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useParams, useSearchParams } from 'next/navigation';
+import { X } from 'lucide-react';
 import VideoGrid from '@/components/VideoGrid';
 import VideoPlayer from '@/components/VideoPlayer';
 import Controls from '@/components/Controls';
@@ -139,12 +140,23 @@ export default function RoomPage() {
       }));
     });
 
+    // Handle room closed by host
+    socket.on('room-closed', ({ message }) => {
+      console.log('🚪 Room closed by host:', message);
+      alert(message || 'The host has closed the room. You will be redirected to the home page.');
+      // Redirect to home page
+      setTimeout(() => {
+        window.location.href = '/';
+      }, 2000);
+    });
+
     return () => {
       socket.off('room-state');
       socket.off('participants-updated');
       socket.off('video-changed');
       socket.off('playback-control');
       socket.off('time-sync');
+      socket.off('room-closed');
     };
   }, [socket, connected, roomId, userName]);
 
@@ -234,9 +246,23 @@ export default function RoomPage() {
         <div className="flex items-center gap-4">
           <ShareInvite roomId={roomId} userName={userName} />
           {isHost && (
-            <span className="px-3 py-1 bg-primary-500 rounded-full text-sm font-medium">
-              Host
-            </span>
+            <>
+              <button
+                onClick={() => {
+                  if (confirm('Are you sure you want to close this room? All participants will be disconnected.')) {
+                    socket?.emit('close-room');
+                  }
+                }}
+                className="px-3 py-1 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
+                title="Close Room"
+              >
+                <X className="w-4 h-4" />
+                Close Room
+              </button>
+              <span className="px-3 py-1 bg-primary-500 rounded-full text-sm font-medium">
+                Host
+              </span>
+            </>
           )}
         </div>
       </div>
