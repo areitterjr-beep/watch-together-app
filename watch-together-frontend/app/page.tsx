@@ -22,13 +22,11 @@ export default function Home() {
       return;
     }
     const newRoomId = Math.random().toString(36).substring(2, 9);
-    try {
-      router.push(`/room/${newRoomId}?name=${encodeURIComponent(userName)}`);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      // Fallback to window.location if router fails
-      window.location.href = `/room/${newRoomId}?name=${encodeURIComponent(userName)}`;
-    }
+    const roomUrl = `/room/${newRoomId}?name=${encodeURIComponent(userName)}`;
+    console.log('🚪 Navigating to room:', roomUrl);
+    
+    // Use window.location for more reliable navigation
+    window.location.href = roomUrl;
   };
 
   const joinRoom = () => {
@@ -40,13 +38,11 @@ export default function Home() {
       alert('Please enter your name first');
       return;
     }
-    try {
-      router.push(`/room/${roomId}?name=${encodeURIComponent(userName)}`);
-    } catch (error) {
-      console.error('Navigation error:', error);
-      // Fallback to window.location if router fails
-      window.location.href = `/room/${roomId}?name=${encodeURIComponent(userName)}`;
-    }
+    const roomUrl = `/room/${roomId}?name=${encodeURIComponent(userName)}`;
+    console.log('🚪 Joining room:', roomUrl);
+    
+    // Use window.location for more reliable navigation
+    window.location.href = roomUrl;
   };
 
   return (
