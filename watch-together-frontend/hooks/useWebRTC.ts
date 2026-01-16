@@ -36,17 +36,25 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
   useEffect(() => {
     // Only run in browser (not during SSR)
     if (typeof window === 'undefined' || !navigator.mediaDevices) {
+      console.log('⚠️ Media devices not available (SSR or not supported)');
       return;
     }
 
+    console.log('📹 Requesting camera and microphone access...');
     navigator.mediaDevices
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
+        console.log('✅ Media access granted:', {
+          videoTracks: stream.getVideoTracks().length,
+          audioTracks: stream.getAudioTracks().length
+        });
         setLocalStream(stream);
         localStreamRef.current = stream;
       })
       .catch((err) => {
-        console.error('Error accessing media devices:', err);
+        console.error('❌ Error accessing media devices:', err);
+        console.error('Error name:', err.name);
+        console.error('Error message:', err.message);
         // Don't throw - just log the error
       });
 
@@ -73,11 +81,13 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
 
     peer.on('signal', (data: any) => {
       if (initiator) {
+        console.log('📤 Sending WebRTC offer to:', socketId);
         socket?.emit('webrtc-offer', {
           offer: data,
           targetSocketId: socketId,
         });
       } else {
+        console.log('📤 Sending WebRTC answer to:', socketId);
         socket?.emit('webrtc-answer', {
           answer: data,
           targetSocketId: socketId,
@@ -86,6 +96,10 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
     });
 
     peer.on('stream', (stream: MediaStream) => {
+      console.log('📹 Received remote stream from:', socketId, {
+        videoTracks: stream.getVideoTracks().length,
+        audioTracks: stream.getAudioTracks().length
+      });
       setRemoteStreams((prev) => {
         const newMap = new Map(prev);
         newMap.set(socketId, stream);
@@ -110,16 +124,24 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
     if (!socket || !localStream) return;
 
     socket.on('webrtc-offer', ({ offer, senderSocketId }) => {
+      console.log('📥 Received WebRTC offer from:', senderSocketId);
       const peer = createPeer(senderSocketId, false);
       if (peer) {
+        console.log('✅ Created peer for offer, signaling...');
         peer.signal(offer);
+      } else {
+        console.error('❌ Failed to create peer for offer');
       }
     });
 
     socket.on('webrtc-answer', ({ answer, senderSocketId }) => {
+      console.log('📥 Received WebRTC answer from:', senderSocketId);
       const peer = peersRef.current.get(senderSocketId);
       if (peer) {
+        console.log('✅ Peer found, signaling answer...');
         peer.signal(answer);
+      } else {
+        console.error('❌ Peer not found for answer:', senderSocketId);
       }
     });
 
@@ -130,15 +152,20 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
       }
     });
 
-    socket.on('user-joined', ({ userId }) => {
+    socket.on('user-joined', ({ userId, userName }) => {
+      console.log('👋 User joined:', { userId, userName, myId: socket.id });
       if (userId !== socket.id) {
+        console.log('🔗 Creating peer connection to:', userId);
         const peer = createPeer(userId, true);
         if (peer) {
+          console.log('✅ Peer connection created');
           setPeers((prev) => {
             const newMap = new Map(prev);
             newMap.set(userId, peer);
             return newMap;
           });
+        } else {
+          console.error('❌ Failed to create peer connection');
         }
       }
     });
@@ -201,7 +228,7 @@ export function useWebRTC(socket: Socket | null, roomId: string): UseWebRTCRetur
       // So: track.enabled = isVideoOff (if OFF=true, enable=true; if ON=false, enable=false)
       const newVideoOffState = !isVideoOff; // Toggle the state
       videoTracks.forEach((track) => {
-        track.enabled = isVideoOff; // If video is OFF (true), enable it (true). If video is ON (false), disable it (false).
+        track.enabled = !newVideoOffState; // If new state is OFF (true), disable track (false). If new state is ON (false), enable track (true).
       });
       setIsVideoOff(newVideoOffState); // Update state
     }

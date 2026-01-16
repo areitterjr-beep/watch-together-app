@@ -11,7 +11,13 @@ import { useSocket } from '@/hooks/useSocket';
 import { useWebRTC } from '@/hooks/useWebRTC';
 import { useBackgroundEffects } from '@/hooks/useBackgroundEffects';
 
+// Debug: Log immediately when module loads
+console.log('📦 Room page module loaded');
+
 export default function RoomPage() {
+  // Debug: Log immediately when component function is called
+  console.log('🏠 RoomPage component function called');
+  
   const params = useParams();
   const searchParams = useSearchParams();
   const roomId = params.id as string;
@@ -19,7 +25,7 @@ export default function RoomPage() {
 
   // Debug: Log when room page loads
   useEffect(() => {
-    console.log('🏠 Room page component loaded');
+    console.log('🏠 Room page component loaded (useEffect)');
     console.log('🏠 Room ID:', roomId);
     console.log('👤 User name:', userName);
     console.log('🌐 Current URL:', typeof window !== 'undefined' ? window.location.href : 'N/A');
@@ -61,13 +67,16 @@ export default function RoomPage() {
   useEffect(() => {
     if (!socket || !connected) return;
 
+    console.log('📤 Joining room:', { roomId, userId: socket.id, userName });
     socket.emit('join-room', {
       roomId,
       userId: socket.id,
-      userName
+      userName: userName || 'Anonymous'
     });
 
     socket.on('room-state', (state) => {
+      console.log('📥 Room state received:', state);
+      console.log('👥 Participants:', state.participants || []);
       setIsHost(state.hostId === socket.id);
       setParticipants(state.participants || []);
       setVideoUrl(state.videoUrl);
@@ -76,6 +85,7 @@ export default function RoomPage() {
     });
 
     socket.on('participants-updated', ({ participants: updatedParticipants }) => {
+      console.log('👥 Participants updated:', updatedParticipants);
       setParticipants(updatedParticipants);
     });
 
